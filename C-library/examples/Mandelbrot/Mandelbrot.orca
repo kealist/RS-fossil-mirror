@@ -1,0 +1,53 @@
+#! /usr/bin/env orca
+ORCA [
+	Title:		"Mandelbrot fractal ASCII renderer"
+	Author:		"Kaj de Vos"
+	Rights:		"Copyright (c) 2012 Kaj de Vos"
+	License: {
+		PD/CC0
+		http://creativecommons.org/publicdomain/zero/1.0/
+	}
+	Needs:		"ORCA"
+	Tabs:		4
+]
+
+threshold: 16.0
+max-iterations: 50000
+
+mandelbrot: func [
+	x		[decimal!]
+	y		[decimal!]
+	/local	i cr ci zr zi zr2 zi2 value
+][
+	cr: y - 0.5
+	ci: x
+	zi: zr: 0.0
+
+	repeat i max-iterations [
+		value: zr * zi
+		zr: (zr2: zr * zr) - (zi2: zi * zi) + cr
+		zi: value + value + ci
+
+		if zr2 + zi2 > threshold [return i]
+	]
+	0
+]
+
+start: now/time
+
+y: -39
+
+until [
+	x: -39
+
+	until [
+		prin either 0 = mandelbrot x / 40.0  y / 40.0 [#"*"] [#" "]
+
+		39 < x: x + 1
+	]
+	print ""
+
+	39 < y: y + 1
+]
+
+print ["Elapsed time:" now/time - start]
