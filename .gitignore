@@ -217,7 +217,7 @@ pip-log.txt
 test/
 *.fossil
 *.fossil-journal
-_FOSSIL_
+*_FOSSIL_
 6502/_FOSSIL_
 C-library/_FOSSIL_
 common/_FOSSIL_
