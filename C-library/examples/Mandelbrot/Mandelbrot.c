@@ -35,7 +35,7 @@ int mandelbrot (
 	return 0;
 }
 
-void main (int argc, const char * argv []) {
+int main (int argc, const char * argv []) {
 	time_t start = time (NULL);
 
 	for (int y = -39; y <= 39; y++) {

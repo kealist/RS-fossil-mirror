@@ -14,7 +14,7 @@ int fibonacci (int n) {
 	return n < 2 ? n : fibonacci (n - 1) + fibonacci (n - 2);
 }
 
-void main (int argc, const char * argv []) {
+int main (int argc, const char * argv []) {
 	time_t start = time (NULL);
 	int f = fibonacci (parameter);
 
