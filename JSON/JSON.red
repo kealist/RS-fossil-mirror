@@ -49,8 +49,8 @@ escapes: charset {"\/}
 
 
 sign: charset "+-"
-e: charset "Ee"
-exponent: [e  opt sign  some digit]
+exponent-prefix: charset "Ee"
+exponent: [exponent-prefix  opt sign  some digit]
 
 escape: [#"\" [
 	set char escapes
@@ -157,7 +157,7 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 	]
 
 	if any [string? value  value: read value] [
-		either into [
+		either out [
 			if parse/case value  either objects [
 				[collect into out [any blank  #"[" array  any blank]]
 			][
@@ -172,7 +172,7 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 ]
 
 encode-JSON: function [				"Return string with control characters escaped to JSON format."
-	string			[string!]		"String to encode (modifies)"
+	string			[string!]		"String to encode (changed, returned)"
 	return:			[string!]
 ][
 	parse string [any [
@@ -204,7 +204,7 @@ to-JSON: function [					"Return value converted to JSON format."
 
 	clear _string
 
-	out: either into [
+	out: either out [
 		either tail? result [result] [_string]
 	][
 		make string! 0

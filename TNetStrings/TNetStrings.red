@@ -126,7 +126,7 @@ load-TNetString: func [				"Return value(s) converted from (Tagged) NetStrings f
 	]
 
 	if any [string? value  value: read value] [
-		either into [
+		either out [
 			here: out
 
 			if parse/case value [collect into out [any element]] [
@@ -151,7 +151,7 @@ to-TNetString: function [			"Return value converted to (Tagged) NetString."
 ][
 	clear _string
 
-	out: either into [
+	out: either out [
 		either tail? result [result] [_string]
 	][
 		make string! 0
