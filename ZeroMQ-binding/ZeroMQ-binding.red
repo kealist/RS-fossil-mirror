@@ -1,7 +1,7 @@
 Red [
 	Title:		"ZeroMQ Binding"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -59,6 +59,8 @@ dealer!:			5
 router!:			6
 pull!:				7
 push!:				8
+; For 0MQ >= 4:
+stream!:			11
 
 ; socket-option!
 max-messages:		1
@@ -484,8 +486,8 @@ receive: function ["Receive and return a message."
 	flags: either no-wait [no-block] [zmq-none]
 
 	case [
-		into	receive-string	socket	out		 flags
-		string	receive-string	socket	copy ""	 flags
-		yes		receive-message	socket			 flags
+		into	receive-string	socket	out				flags
+		string	receive-string	socket	make string! 0	flags
+		yes		receive-message	socket					flags
 	]
 ]

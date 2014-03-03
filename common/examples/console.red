@@ -7,8 +7,9 @@ Red [
 		See https://github.com/dockimbel/Red/blob/master/BSL-License.txt
 	}
 	Needs: {
-		Red >= 0.4.0
+		Red > 0.4.1
 		%C-library/input-output.red | %common/input-output.red
+		%Red/tests/help.red
 	}
 	Tabs:		4
 ]
@@ -142,8 +143,6 @@ do-input: function [
 		print ["==" result]
 	]
 ]
-
-q: :quit
 
 halt?: yes
 
@@ -281,5 +280,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 ]
+
+q: :quit
+
+#include %../../Red/tests/help.red
 
 do-console

@@ -1,7 +1,7 @@
 Red/System [
 	Title:		"ZeroMQ Binding"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -58,6 +58,8 @@ zmq: context [
 		router!
 		pull!
 		push!
+;		For 0MQ >= 4:
+		stream!:			11
 	]
 
 	#enum socket-option! [
