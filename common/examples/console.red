@@ -101,7 +101,7 @@ input-line: routine [
 			either none? line [  ; EOF or error
 				RETURN_NONE
 			][
-				SET_RETURN ((string/load line  (length? line) + 1))
+				SET_RETURN ((string/load line  (length? line) + 1  UTF-8))
 ;				free-any line
 			]
 		]
@@ -111,7 +111,7 @@ input-line: routine [
 			either none? line [  ; EOF or error
 				RETURN_NONE
 			][
-				SET_RETURN ((string/load line  (length? line) + 1))
+				SET_RETURN ((string/load line  (length? line) + 1  UTF-8))
 ;				free-any line
 			]
 		]
@@ -123,7 +123,7 @@ input-line: routine [
 			][
 				#if OS <> 'MacOSX [add-history line]
 
-				SET_RETURN ((string/load line  (length? line) + 1))
+				SET_RETURN ((string/load line  (length? line) + 1  UTF-8))
 ;				free-any line
 			]
 		]

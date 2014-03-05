@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red >= 0.4.1
+		Red > 0.4.1
 		%C-library/ANSI.reds
 	}
 	Notes: {
@@ -61,7 +61,7 @@ take-argument: routine ["Consume and return next program argument."
 	either none? argument [
 		RETURN_NONE
 	][
-		SET_RETURN ((string/load argument  (length? argument) + 1))
+		SET_RETURN ((string/load argument  (length? argument) + 1  UTF-8))
 ;		end-argument argument
 	]
 ]
@@ -75,7 +75,7 @@ get-argument: routine ["Return a program argument."
 	either none? argument [
 		RETURN_NONE
 	][
-		SET_RETURN ((string/load argument  (length? argument) + 1))
+		SET_RETURN ((string/load argument  (length? argument) + 1  UTF-8))
 ;		end-argument argument
 	]
 ]

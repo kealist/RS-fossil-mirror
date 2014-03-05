@@ -1,7 +1,7 @@
 Red [
 	Title:		"Input/Output"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2013 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2013,2014 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red >= 0.4.1
+		Red > 0.4.1
 		%common/input-output.reds
 		%common/common.red
 	}
@@ -48,7 +48,7 @@ read: routine ["Read file."
 	either none? data [
 		RETURN_NONE
 	][
-		SET_RETURN ((string/load data  1 + length? data))
+		SET_RETURN ((string/load data  (length? data) + 1  UTF-8))
 ;		free data
 	]
 ]

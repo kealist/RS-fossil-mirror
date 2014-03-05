@@ -1,7 +1,7 @@
 Red [
 	Title:		"GTK+ Binding"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.3.2
+		Red > 0.4.1
 		GTK 2
 		%common.red
 		%GTK.reds
@@ -134,7 +134,7 @@ get-button-text: routine ["Get button label."
 	/local			text
 ][
 	with gtk [text: gtk/get-button-text as button! button]
-	SET_RETURN ((string/load text  1 + length? text))
+	SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ]
 
 
@@ -168,7 +168,7 @@ get-field-text: routine ["Get line entry field text."
 	/local			text
 ][
 	with gtk [text: get-entry-text as entry! field]
-	SET_RETURN ((string/load text  1 + length? text))
+	SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ]
 
 
@@ -201,7 +201,7 @@ get-area-text: routine ["Get multi-line field text."
 	with gtk [text: gtk/get-area-text as scrolled-window! area]
 
 	either as-logic text [
-		SET_RETURN ((string/load text  1 + length? text))
+		SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ;		g/g-free as-binary text
 	][
 		RETURN_NONE

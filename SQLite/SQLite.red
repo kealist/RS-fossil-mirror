@@ -1,7 +1,7 @@
 Red [
 	Title:		"SQLite Binding"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red >= 0.3.2
+		Red > 0.4.1
 		SQLite 3
 		%SQLite.reds
 		%common/common.red
@@ -119,14 +119,14 @@ version: routine ["Return SQLite version."
 	/local				version
 ][
 	version: sqlite/version
-	SET_RETURN ((string/load version  1 + length? version))
+	SET_RETURN ((string/load version  (length? version) + 1  UTF-8))
 ]
 source-version: routine ["Return SQLite source ID."
 ;	return:				[string!]
 	/local				version
 ][
 	version: sqlite/source-version
-	SET_RETURN ((string/load version  1 + length? version))
+	SET_RETURN ((string/load version  (length? version) + 1  UTF-8))
 ]
 version-number: routine ["Return SQLite version number."
 	return:				[integer!]
@@ -155,7 +155,7 @@ form-error: routine ["Return UTF-8 status message."
 	/local				text
 ][
 	with sqlite [text: sqlite/form-error as sqlite! db]
-	SET_RETURN ((string/load text  1 + length? text))
+	SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ]
 form-error-utf16: routine ["Return UTF-16 status message."
 	db					[integer!]  "sqlite!"
@@ -281,7 +281,7 @@ do-sql: routine ["Execute SQL statements."
 	free-any text
 
 	either as-logic status [
-		SET_RETURN ((string/load error-reference/value  1 + length? error-reference/value))
+		SET_RETURN ((string/load error-reference/value  (length? error-reference/value) + 1  UTF-8))
 ;		sqlite-free as-binary error-reference/value
 	][
 		RETURN_NONE
@@ -382,7 +382,7 @@ pick-symbol: routine ["Name of parameter in SQL statement."
 	/local				name
 ][
 	with sqlite [name: sqlite/pick-symbol as sql! sql  index]
-	SET_RETURN ((string/load name  1 + length? name))
+	SET_RETURN ((string/load name  (length? name) + 1  UTF-8))
 ]
 
 
@@ -512,7 +512,7 @@ pick-name: routine ["Column name."
 	/local				name
 ][
 	with sqlite [name: sqlite/pick-name as sql! row  column]
-	SET_RETURN ((string/load name  1 + length? name))
+	SET_RETURN ((string/load name  (length? name) + 1  UTF-8))
 ]
 pick-utf16-name: routine ["UTF-16 column name."
 	row					[integer!]  "sql!"
@@ -572,7 +572,7 @@ pick-string: routine ["Extract column text."
 	/local				text
 ][
 	with sqlite [text: sqlite/pick-string as sql! row  column]
-	SET_RETURN ((string/load text  1 + length? text))
+	SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ]
 pick-utf16: routine ["Extract UTF-16 column value."
 	row					[integer!]  "sql!"

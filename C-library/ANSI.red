@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.3.1
+		Red > 0.4.1
 		%C-library/ANSI.reds
 		%common/common.red
 	}
@@ -100,7 +100,7 @@ to-hex-size: routine ["Return integer formatted as hexadecimal string."
 	either none? text [
 		RETURN_NONE
 	][
-		SET_RETURN ((string/load text  (length? text) + 1))
+		SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ;		free-any text
 	]
 ]
@@ -125,7 +125,7 @@ input: routine ["Return a line read from standard input."
 	either none? line [
 		RETURN_NONE  ; FIXME: report error
 	][
-		SET_RETURN ((string/load line  (length? line) + 1))
+		SET_RETURN ((string/load line  (length? line) + 1  UTF-8))
 ;		free-any line
 	]
 ]
@@ -210,21 +210,21 @@ now-with: routine ["Return current time."
 						]
 						zone? [
 							either 5 <= format-any [text "%c%i:%02i" sign  zone / 60  zone // 60] [
-								SET_RETURN ((string/load text  (length? text) + 1))
+								SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 							][	; FIXME: report error
 								RETURN_NONE
 							]
 						]
 						date? [
 							either format-date text 27 "%d-%b-%Y" date [
-								SET_RETURN ((string/load text  (length? text) + 1))
+								SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 							][	; FIXME: report error
 								RETURN_NONE
 							]
 						]
 						time? [
 							either format-date text 27 "%H:%M:%S" date [
-								SET_RETURN ((string/load text  (length? text) + 1))
+								SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 							][	; FIXME: report error
 								RETURN_NONE
 							]
@@ -232,7 +232,7 @@ now-with: routine ["Return current time."
 						yes [
 							either format-date text 27 "%d-%b-%Y/%H:%M:%S" date [
 								either any [utc?  25 <= format-any [text "%s%c%i:%02i" text sign  zone / 60  zone // 60]] [
-									SET_RETURN ((string/load text  (length? text) + 1))
+									SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 								][	; FIXME: report error
 									RETURN_NONE
 								]
@@ -333,7 +333,7 @@ get-env: routine ["Return system environment variable."
 	either none? value [
 		RETURN_NONE
 	][
-		SET_RETURN ((string/load value  (length? value) + 1))
+		SET_RETURN ((string/load value  (length? value) + 1  UTF-8))
 ;		free-any value  ; ?
 	]
 ]

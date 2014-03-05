@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red >= 0.3.3
+		Red > 0.4.1
 		0MQ >= 2.0.7
 		%C-library/ANSI.reds
 		%ZeroMQ-binding.reds
@@ -131,7 +131,7 @@ form-error: routine ["Return status message."
 	/local			text
 ][
 	text: zmq/form-error code
-	SET_RETURN ((string/load text  (length? text) + 1))
+	SET_RETURN ((string/load text  (length? text) + 1  UTF-8))
 ]
 
 
