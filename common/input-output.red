@@ -106,6 +106,7 @@ do: function ["Execute code from a source."
 	source
 ][
 	if file? source [source: read source]
+	if string? source [source: load/all/into source  clear _block]
 
 	first head reduce/into dummy: [do* source] clear _result  ; Force use of interpreter
 ]

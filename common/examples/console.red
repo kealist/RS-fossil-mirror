@@ -146,7 +146,7 @@ do-input: function [
 
 halt?: yes
 
-halt: does [  ; FIXME #626: HALT conflicts with internal definition
+halt: does [
 	halt?: yes
 	()
 ]
@@ -169,7 +169,7 @@ do-console: function [] [
 
 		print {
 -=== Red Console alpha version ===-
-(only ASCII input supported)
+Type HELP for starter information.
 }
 
 		buffer: make string! 1000
@@ -214,6 +214,8 @@ do-console: function [] [
 		]
 	]
 ]
+
+#include %../../Red/tests/help.red
 
 about: does [
 	print [
@@ -282,7 +284,5 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]
 
 q: :quit
-
-#include %../../Red/tests/help.red
 
 do-console

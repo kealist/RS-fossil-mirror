@@ -204,7 +204,7 @@ to-JSON: function [					"Return value converted to JSON format."
 
 	clear _string
 
-	out: either out [
+	out: either result [
 		either tail? result [result] [_string]
 	][
 		make string! 0
