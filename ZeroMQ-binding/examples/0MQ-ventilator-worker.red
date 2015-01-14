@@ -1,24 +1,24 @@
 Red [
 	Title:		"ZeroMQ ventilator worker example"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2012,2013 Kaj de Vos"
+	Rights:		"Copyright (c) 2012-2014 Kaj de Vos"
 	License: {
 		PD/CC0
 		http://creativecommons.org/publicdomain/zero/1.0/
 	}
 	Needs: {
-		Red >= 0.3.2
+		Red >= 0.4.3
 		%C-library/ANSI.red
 		%ZeroMQ-binding.red
 	}
 	Tabs:		4
 ]
 
-#include %../../C-library/ANSI.red
+;#include %../../C-library/ANSI.red
 #include %../ZeroMQ-binding.red
 
-source-address:	any [get-argument 1  "tcp://localhost:5557"]
-sink-address:	any [get-argument 2  "tcp://localhost:5558"]
+source-address:	any [get-argument 1  tcp://localhost:5557]
+sink-address:	any [get-argument 2  tcp://localhost:5558]
 
 log-error: does [  ; FIXME: should go to stderr
 	print form-error system-error
@@ -44,7 +44,7 @@ either zero? pool: make-pool 1 [
 			either connect sink sink-address [
 				print "Pulling tasks from ventilator source..."
 
-				random/seed/secure 0
+;				random/seed/secure 0
 				work: ""
 				task: 0
 

@@ -26,8 +26,6 @@ Red/System [
 	Needs: {
 		Red/System >= 0.3.3
 		0MQ >= 2.0.7
-		; For Windows:
-		0MQ >= 3
 		%common.reds
 	}
 	Tabs:		4
@@ -109,10 +107,16 @@ zmq: context [
 		data5				[integer16!]
 	]
 
-	#switch OS [
-		Windows		[#define ZMQ-library "libzmq.dll"]
-		MacOSX		[#define ZMQ-library "libzmq.dylib"]
-		#default	[#define ZMQ-library "libzmq.so.1"]
+	#case [
+		OS = 'Windows	[#define ZMQ-library "libzmq.dll"]
+		OS = 'MacOSX	[#define ZMQ-library "libzmq.dylib"]
+		all [value? 'ZeroMQ-version  ZeroMQ-version = 3] [  ; For 0MQ <= 4.0.4. Sigh...
+			#define ZMQ-library "libzmq.so.3"
+		]
+		all [value? 'ZeroMQ-version  ZeroMQ-version = 2] [
+			#define ZMQ-library "libzmq.so.1"
+		]
+		yes				[#define ZMQ-library "libzmq.so.4"]
 	]
 	#import [ZMQ-library cdecl [
 		version: "zmq_version" [				"Return 0MQ version."
@@ -220,36 +224,39 @@ zmq: context [
 			return: 	[size!]
 		]
 
-		#either OS = 'Windows [  ; 0MQ >= 3
-			_send-message: "zmq_msg_send" [		"Send message."
-				message		[message!]
-				socket		[socket!]
-				flags		[send-receive-flags!]
-				return: 	[status!]
+		#case [  ; Red FIXME: #either
+			all [value? 'ZeroMQ-version  ZeroMQ-version = 2] [
+				_send-message: "zmq_send" [			"Send message."
+					socket		[socket!]
+					message		[message!]
+					flags		[send-receive-flags!]
+					return: 	[status!]
+				]
+				_receive-message: "zmq_recv" [		"Receive a message."
+					socket		[socket!]
+					message		[message!]
+					flags		[send-receive-flags!]
+					return: 	[status!]
+				]
 			]
-			_receive-message: "zmq_msg_recv" [	"Receive a message."
-				message		[message!]
-				socket		[socket!]
-				flags		[send-receive-flags!]
-				return: 	[status!]
-			]
+			yes [
+				_send-message: "zmq_msg_send" [		"Send message."
+					message		[message!]
+					socket		[socket!]
+					flags		[send-receive-flags!]
+					return: 	[status!]
+				]
+				_receive-message: "zmq_msg_recv" [	"Receive a message."
+					message		[message!]
+					socket		[socket!]
+					flags		[send-receive-flags!]
+					return: 	[status!]
+				]
 
-			more-message?: "zmq_msg_more" [		"Is message followed by more parts in a multi-part message?"
-				message		[message!]
-				return: 	[logic!]
-			]
-		][
-			_send-message: "zmq_send" [			"Send message."
-				socket		[socket!]
-				message		[message!]
-				flags		[send-receive-flags!]
-				return: 	[status!]
-			]
-			_receive-message: "zmq_recv" [		"Receive a message."
-				socket		[socket!]
-				message		[message!]
-				flags		[send-receive-flags!]
-				return: 	[status!]
+				more-message?: "zmq_msg_more" [		"Is message followed by more parts in a multi-part message?"
+					message		[message!]
+					return: 	[logic!]
+				]
 			]
 		]
 
@@ -344,14 +351,17 @@ zmq: context [
 		return:		[logic!]
 		/local		size
 	][
-		#either OS = 'Windows [  ; 0MQ >= 3
-			size: 4
-			all [
-				get socket name  as-handle value  :size
-				size = 4
+		#case [
+			all [value? 'ZeroMQ-version  ZeroMQ-version = 2] [
+				get-integer socket name value
 			]
-		][
-			get-integer socket name value
+			yes [
+				size: 4
+				all [
+					get socket name  as-handle value  :size
+					size = 4
+				]
+			]
 		]
 	]
 
@@ -452,16 +462,19 @@ zmq: context [
 		return:		[integer!]  "1: complete; 0: more parts; -1: error"
 		/local		value
 	][
-;		#either 0MQ >= 3 [
-;			as-integer not more-message? message
-;		][
-			value: 0
+;		#case [
+;			all [value? 'ZeroMQ-version  ZeroMQ-version >= 3] [
+;				as-integer not more-message? message
+;			]
+;			yes [
+				value: 0
 
-			either get-logic socket receive-more? :value [
-				value xor 1
-			][
-				-1
-			]
+				either get-logic socket receive-more? :value [
+					value xor 1
+				][
+					-1
+				]
+;			]
 ;		]
 	]
 
@@ -471,7 +484,14 @@ zmq: context [
 		flags		[send-receive-flags!]
 		return:		[logic!]
 	][
-		0 <= _send-message #either OS = 'Windows [message socket] [socket message] flags
+		0 <= _send-message
+			#case [
+				all [value? 'ZeroMQ-version  ZeroMQ-version = 2] [  ; Red FIXME: preprocessor breaks when on next line
+					socket message
+				]
+				yes [message socket]
+			]
+			flags
 	]
 	receive-message: function ["Receive a message."
 		socket		[socket!]
@@ -479,7 +499,14 @@ zmq: context [
 		flags		[send-receive-flags!]
 		return:		[logic!]
 	][
-		0 <= _receive-message #either OS = 'Windows [message socket] [socket message] flags
+		0 <= _receive-message
+			#case [
+				all [value? 'ZeroMQ-version  ZeroMQ-version = 2] [
+					socket message
+				]
+				yes [message socket]
+			]
+			flags
 	]
 
 	send-empty: function ["Send empty message."

@@ -7,6 +7,7 @@ Red [
 		http://creativecommons.org/publicdomain/zero/1.0/
 	}
 	Needs: {
+		Red >= 0.4.3
 		%common/input-output.red
 		%JSON.red
 	}
@@ -39,5 +40,5 @@ print to-JSON			complement s
 print to-JSON/flat		blank
 print to-JSON			charset [100 1000]
 
-print headers: read "http://headers.jsontest.com"
+print headers: read http://headers.jsontest.com
 print to-JSON/map probe load-JSON/keys headers

@@ -7,9 +7,10 @@ Red [
 		See https://github.com/dockimbel/Red/blob/master/BSL-License.txt
 	}
 	Needs: {
-		Red > 0.4.1
+		Red >= 0.5
 		%C-library/input-output.red | %common/input-output.red
-		%Red/tests/help.red
+		%Red/environment/console/help.red
+		%Red/system/library/call/call.red
 	}
 	Tabs:		4
 ]
@@ -215,7 +216,10 @@ Type HELP for starter information.
 	]
 ]
 
-#include %../../Red/tests/help.red
+#include %../../Red/environment/console/help.red
+
+; Disable ansi.reds inclusion in there:
+#include %../../Red/system/library/call/call.red
 
 about: does [
 	print [

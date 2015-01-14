@@ -24,8 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
-		0MQ >= 2.0.7
+		Red >= 0.4.2
 		%C-library/ANSI.reds
 		%ZeroMQ-binding.reds
 		%common.red
@@ -290,18 +289,31 @@ message-to-string: routine ["Free binary message, return content converted into 
 			end-message message
 			RETURN_NONE
 		][
-			; Ensure tail marker
-			size: message-size-of as message! message
-			if zero? size [size: 1]
-			text/size: null-byte
-
 			string/header: TYPE_STRING
 			string/head: 0
 			series: GET_BUFFER (string)
 			series/flags: series/flags and flag-unit-mask or Latin1
-			unicode/load-utf8-buffer
-				text size
-				series null
+
+			size: message-size-of as message! message
+
+			either text/size = null-byte [
+				unicode/load-utf8-buffer
+					text size
+					series null
+			][
+				either size = 1 [  ; Work around Red "optimisation"
+					text/2: null-byte  ; WARN: assume small message is contained in struct!
+					unicode/load-utf8-buffer
+						text 2
+						series null
+				][
+					unicode/load-utf8-buffer
+						text size
+						series null
+					; Correct Red's tail marker "correction"
+					series/tail: as cell! (as-binary series/tail) + GET_UNIT (series)
+				]
+			]
 			string/cache: null
 
 			either end-message message [
@@ -407,7 +419,7 @@ send-string: routine ["Send text message as UTF-8."
 			as socket! socket
 			message
 			as-binary text
-			(length? text) + 1
+			length? text
 			flags
 	]
 ]
@@ -429,18 +441,31 @@ receive-string: routine ["Receive and return a UTF-8 text message into a buffer.
 				logic/box no
 ;				RETURN_NONE
 			][
-				; Ensure tail marker
-				size: message-size-of message
-				if zero? size [size: 1]
-				text/size: null-byte
-
 				string/header: TYPE_STRING
 				string/head: 0
 				series: GET_BUFFER (string)
 				series/flags: series/flags and flag-unit-mask or Latin1
-				unicode/load-utf8-buffer
-					text size
-					series null
+
+				size: message-size-of message
+
+				either text/size = null-byte [
+					unicode/load-utf8-buffer
+						text size
+						series null
+				][
+					either size = 1 [  ; Work around Red "optimisation"
+						text/2: null-byte  ; WARN: assume small message is contained in struct!
+						unicode/load-utf8-buffer
+							text 2
+							series null
+					][
+						unicode/load-utf8-buffer
+							text size
+							series null
+						; Correct Red's tail marker "correction"
+						series/tail: as cell! (as-binary series/tail) + GET_UNIT (series)
+					]
+				]
 				string/cache: null
 
 				either zmq/end-message message [  ; FIXME: error code may get replaced

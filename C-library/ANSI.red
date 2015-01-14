@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
+		Red > 0.4.2
 		%C-library/ANSI.reds
 		%common/common.red
 	}
@@ -87,6 +87,8 @@ load-octal: routine ["Return integer parsed from octal string."
 ]
 
 
+comment {
+
 ; Formatting
 
 to-hex-size: routine ["Return integer formatted as hexadecimal string."
@@ -105,13 +107,15 @@ to-hex-size: routine ["Return integer formatted as hexadecimal string."
 	]
 ]
 to-hex: func ["Return integer formatted as hexadecimal string."
-	number			[integer!]
+	number			[integer! char!]
 	/size
 		length		[integer!]  "Number of digits"
 	return:			[string! none!]
 ][
 	to-hex-size number  any [length 8]
 ]
+
+}
 
 
 ; Input/output
@@ -140,7 +144,8 @@ ask: function ["Prompt for input, then return a line read from standard input."
 
 ; Dates and time
 
-now-with: routine ["Return current time."
+date-with: routine ["Return date or time component."
+	time			[integer!]  "time!"
 	precise?		[logic!]
 	utc?			[logic!]
 	zone?			[logic!]
@@ -155,10 +160,8 @@ now-with: routine ["Return current time."
 	weekday?		[logic!]
 	yearday?		[logic!]
 ;	return:			[string! integer! none!]
-	/local			time date minutes zone sign day text
+	/local			date minutes zone sign day text
 ][
-	time: now-time null
-
 	either time = -1 [
 		RETURN_NONE
 	][
@@ -247,6 +250,30 @@ now-with: routine ["Return current time."
 		]
 	]
 ]
+date: function ["Return date or time component."
+	value			[integer!]  "time!"
+	/precise
+	/utc /zone
+	/date /time
+	/year /month /day
+	/hour /minute /second
+	/weekday /yearday
+	return:			[string! integer! none!]
+][
+	date-with
+		value
+		precise
+		utc zone
+		date time
+		year month day
+		hour minute second
+		weekday yearday
+]
+now-time: routine ["Return current time."
+	return:			[integer!]  "time!"
+][
+	system/words/now-time null
+]
 now: function ["Return current time."
 	/precise
 	/utc /zone
@@ -256,7 +283,8 @@ now: function ["Return current time."
 	/weekday /yearday
 	return:			[string! integer! none!]
 ][
-	now-with
+	date-with
+		now-time
 		precise
 		utc zone
 		date time
@@ -294,6 +322,8 @@ get-process-seconds: routine ["Return CPU time used by process in seconds; wall-
 ]
 
 
+comment {
+
 ; Random numbers
 
 random-with: routine ["Return pseudo-random number from 1 thru NUMBER."
@@ -318,6 +348,8 @@ random: function ["Return pseudo-random number from 1 thru NUMBER."
 	random-with number seed secure
 ]
 
+}
+
 
 ; System interfacing
 
@@ -338,7 +370,7 @@ get-env: routine ["Return system environment variable."
 	]
 ]
 
-call-system: routine ["Execute external system command."
+_call-system: routine ["Execute external system command."
 	command			[string!]
 	return:			[integer!]
 	/local text status
@@ -348,11 +380,11 @@ call-system: routine ["Execute external system command."
 	free-any text
 	status
 ]
-call: function ["Execute external system command."
+call-system: function ["Execute external system command."
 	command			[string!]
 	/wait			"Await command's return."
 	return:			[integer!]
 ][
 	; TODO: no-wait on Windows
-	call-system either any [wait Windows?] [command] [append copy command  " &"]
+	_call-system either any [wait Windows?] [command] [append copy command  " &"]
 ]

@@ -1,13 +1,13 @@
 Red [
 	Title:		"ZeroMQ ventilator source example"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2012,2013 Kaj de Vos"
+	Rights:		"Copyright (c) 2012-2014 Kaj de Vos"
 	License: {
 		PD/CC0
 		http://creativecommons.org/publicdomain/zero/1.0/
 	}
 	Needs: {
-		Red >= 0.3.2
+		Red >= 0.4.3
 		%C-library/ANSI.red
 		%ZeroMQ-binding.red
 	}
@@ -18,8 +18,8 @@ Red [
 #include %../ZeroMQ-binding.red
 
 work:			any [get-argument 1  "random 100"]
-source-address:	any [get-argument 2  "tcp://*:5557"]
-sink-address:	any [get-argument 3  "tcp://localhost:5558"]
+source-address:	any [get-argument 2  tcp://*:5557]
+sink-address:	any [get-argument 3  tcp://localhost:5558]
 
 log-error: does [  ; FIXME: should go to stderr
 	print form-error system-error

@@ -2,7 +2,7 @@
 REBOL [
 	Title:		"Download or update all Red(/System) extensions"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2013 Kaj de Vos"
+	Rights:		"Copyright (c) 2013,2014 Kaj de Vos"
 	License: {
 		PD/CC0
 		http://creativecommons.org/publicdomain/zero/1.0/
@@ -43,7 +43,7 @@ foreach target [
 	%JSON
 	%6502
 ][
-	print ["Target" target]
+	print [newline  "Target" target]
 
 	either exists? target [
 		change-dir target

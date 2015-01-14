@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
+		Red >= 0.4.3
 		%C-library/ANSI.red
 		READ
 	}
@@ -32,8 +32,6 @@ Red [
 		To convert Red values to and from JSON format.
 	}
 	Notes: {
-		Needs to be compiled. Current Red interpreter can't LOAD the script.
-		Floats are loaded as file! for now because Red doesn't have them yet.
 		Escaped UTF-16 surrogate pairs not supported yet.
 		Red words to convert to JSON should not contain illegal characters.
 	}
@@ -50,45 +48,36 @@ escapes: charset {"\/}
 
 sign: charset "+-"
 exponent-prefix: charset "Ee"
-exponent: [exponent-prefix  opt sign  some digit]
 
-escape: [#"\" [
-	set char escapes
-	| #"n" (char: lf)
-	| #"r" (char: cr)
-	| #"t" (char: tab)
-	| #"f" (char: #"^(page)")
-	| #"b" (char: #"^(back)")
-	| #"u" start: 4 skip
-		(char: make char! any [
-			load-hex append/part clear _string  start 4
-			0
-		])
-	]
-]
-
-load-JSON: func [					"Return value(s) converted from JSON format."
+load-JSON: function [				"Return value(s) converted from JSON format."
 	value			[string! file!]	"JSON value"
 	/objects						"Convert objects to Red objects."
 	/keys							"Convert object keys to Red value."
 	/values							"Convert string values to Red value."
 	/into							"Insert contents of a JSON array or object into existing block."
-		out			[block!]		"Result buffer"
-	/local  ; FIXME: #600
-;		start stop
-		escaped string loaded element pair object array
+		out			[block!]		"Result buffer (changed)"
 ][
-	escaped: [
-;		collect into value [any [  ; FIXME: #598
-;			keep some character
-;			| escape keep (char)
-;		]]
-;		(value: head value)
-		any [
-			start: some character stop:
-				(append/part value start  offset? start stop)  ; FIXME: #580
-			| escape (append value char)
+	exponent: [exponent-prefix  opt sign  some digit]
+
+	escape: [#"\" [
+		set char escapes
+		| #"n" (char: lf)
+		| #"r" (char: cr)
+		| #"t" (char: tab)
+		| #"f" (char: #"^(page)")
+		| #"b" (char: #"^(back)")
+		| #"u" start: 4 skip
+			(char: make char! any [
+				load-hex append/part clear _string  start 4
+				0
+			])
 		]
+	]
+	escaped: [
+		collect into value [any [
+			keep some character
+			| escape keep (char)
+		]]
 		#"^""
 	]
 	string: [
@@ -100,17 +89,19 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 		(value: clear _string) escaped
 		(value: load/into value  clear _item)
 	]
+
 	element: [
 		any blank [
 			#"^"" [if (values) then loaded | string]
 			| start: [opt #"-" [#"0" | non-zero  any digit]] [
 				[#"." some digit  opt exponent | exponent] stop:	; Float
-					(value: append/part make file! 0				; TODO: conversion
-						start  offset? start stop
+					if (float? value: load/part/into
+						start stop
+						clear _item
 					)
 				| stop:												; Integer
-					if (integer? value: load/into append/part
-						clear _string  start  offset? start stop
+					if (integer? value: load/part/into
+						start stop
 						clear _item
 					)
 				]
@@ -118,7 +109,7 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 			| "false"	(value: no)
 			| "null"	(value: none)
 			| #"[" collect set value [array]
-			| #"{" collect set value [object]
+			| #"{" collect set value [object-rule]
 				(if objects [value: context value])  ; TODO: #618
 		]
 		any blank
@@ -142,7 +133,7 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 
 		element keep (value)
 	]
-	object: [
+	object-rule: [
 		any blank
 		opt [pair  any [#"," pair]]
 		#"}"
@@ -159,9 +150,9 @@ load-JSON: func [					"Return value(s) converted from JSON format."
 	if any [string? value  value: read value] [
 		either out [
 			if parse/case value  either objects [
-				[collect into out [any blank  #"[" array  any blank]]
+				[collect after out [any blank  #"[" array  any blank]]
 			][
-				[collect into out [any blank [#"{" object | #"[" array] any blank]]
+				[collect after out [any blank [#"{" object-rule | #"[" array] any blank]]
 			][
 				out
 			]
@@ -184,7 +175,7 @@ encode-JSON: function [				"Return string with control characters escaped to JSO
 		| remove #"^(page)"	insert "\f"
 		| remove #"^(back)"	insert "\b"
 		; TODO: optimise memory:
-		| remove set char skip  insert "\u" insert (any [to-hex/size char 4  "0000"])
+		| remove set char skip  insert "\u" insert (to-hex/size char 4)
 	]]
 	string
 ]
@@ -196,8 +187,8 @@ to-JSON: function [					"Return value converted to JSON format."
 		margin		[integer!]		"Number of tabs"
 	/map							"Convert even sized any-block! to a JSON object."
 	/deep							"Convert nested any-block! to JSON objects."
-	/into							"Insert result into existing string."
-		result		[string!]		"Result buffer"
+	/into							"Insert result into existing string. Appending uses result buffer directly."
+		result		[string!]		"Result buffer (changed, returned)"
 	return:			[string! none!]	"NONE: error"
 ][
 	unless indent [margin: 0]
@@ -303,9 +294,9 @@ to-JSON: function [					"Return value converted to JSON format."
 						append append append out  #"^"" item {":}
 
 						unless either deep [
-							to-JSON/flat/map/deep/into do [value/:item]  tail out
+							to-JSON/flat/map/deep/into get in value item  tail out
 						][
-							to-JSON/flat/into do [value/:item]  tail out
+							to-JSON/flat/into get in value item  tail out
 						][
 							return none
 						]
@@ -320,9 +311,9 @@ to-JSON: function [					"Return value converted to JSON format."
 						append append append append/dup out  tab margin  #"^"" item {": }
 
 						unless either deep [
-							to-JSON/indent/map/deep/into do [value/:item] margin  tail out
+							to-JSON/indent/map/deep/into get in value item  margin  tail out
 						][
-							to-JSON/indent/into do [value/:item] margin  tail out
+							to-JSON/indent/into get in value item  margin  tail out
 						][
 							return none
 						]
@@ -333,8 +324,8 @@ to-JSON: function [					"Return value converted to JSON format."
 			]
 			append out #"}"
 		]
-		all [bitset? value  not find/match append out value  "make bitset! [not "] [  ; TODO: #622
-			append clear out  #"["
+		all [bitset? value  not complement? value] [
+			append out #"["
 
 ;			unless empty? value [  ; FIXME: #613, #614
 				size: length? value
@@ -383,7 +374,7 @@ to-JSON: function [					"Return value converted to JSON format."
 			append encode-JSON append insert  clear out  #"^"" value #"^""
 	]
 	either into [
-		either empty? _string [
+		either empty? _string [  ; Append mode
 			tail result
 		][
 			out: insert result _string

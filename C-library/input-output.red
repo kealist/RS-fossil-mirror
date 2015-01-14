@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
+		Red > 0.4.3
 		%common/common.red
 	}
 	Tabs:		4
@@ -77,7 +77,9 @@ write: routine ["Write file."
 ]
 
 
-load*: :load
+comment {
+
+load**: :load
 
 load: function ["Return a value or block of values by loading a source."
 	source			[string! file!]
@@ -90,15 +92,15 @@ load: function ["Return a value or block of values by loading a source."
 	either source [
 		either all [
 			either into [
-				do [load*/all/into source out]
+				do [load**/all/into source out]
 			][
-				do [load*/all source]
+				do [load**/all source]
 			]
 		][
 			either into [
-				do [load*/into source out]
+				do [load**/into source out]
 			][
-				do [load* source]
+				do [load** source]
 			]
 		]
 	][
@@ -106,14 +108,17 @@ load: function ["Return a value or block of values by loading a source."
 	]
 ]
 
-do*: :do
-_result: make block! 1  ; WARN: not thread safe
+}
 
-do: function ["Execute code from a source."
-	source
-][
-	if file? source [source: read source]
-	if string? source [source: load/all/into source  clear _block]
+context [
+	do*: :do
+	result: make block! 1  ; WARN: not thread safe
 
-	first head reduce/into dummy: [do* source] clear _result  ; Force use of interpreter
+	set 'do function ["Execute code from a source."
+		source
+	][
+		if any [file? source  url? source] [source: read source]
+
+		first head reduce/into dummy: [do* source] clear result  ; Force use of interpreter
+	]
 ]

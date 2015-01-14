@@ -24,11 +24,8 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
+		Red >= 0.4.2
 		%C-library/ANSI.reds
-	}
-	Notes: {
-		Needs to be compiled. Current Red interpreter can't properly LOAD the script.
 	}
 	Tabs:		4
 ]
@@ -41,6 +38,7 @@ Red [
 
 ; WARN: not thread safe
 _string: make string! 0
+_file: make file! 0
 _block: make block! 0
 _item: make block! 1
 
@@ -96,72 +94,76 @@ get-arguments: function ["Return program arguments, excluding program name."
 ]
 
 
-; PARSE rules
+comment {
 
-blank:			charset " ^(tab)^(line)^M^(page)"
+; Bitwise operations
 
-letter:			charset [#"A" - #"Z"  #"a" - #"z"]
-
-digit:			charset "0123456789"
-non-zero:		charset "123456789"
-octal:			charset "01234567"
-hexadecimal:	union digit charset [#"A" - #"F"  #"a" - #"f"]
-
-
-; Common functions
-
-Windows?: system/platform = 'Windows
-
-found?: func ["Test if value is not NONE."
-	value
-	return:			[logic!]
-][
-	not none? :value
-]
-
-any-word!: [word! lit-word! set-word! get-word! issue! refinement! datatype!]
-any-string!: [string! file!]
-any-block!: [block! paren! path! lit-path! set-path! get-path!]
-
-any-word?: func ["Test if value is a word of any type."
-	value
-	return:			[logic!]
-][
-	found? find any-word! type?/word :value
-]
-series?: func ["Test if value is a series of any type."
-	value
-	return:			[logic!]
-][
-	found? any-series? :value
-]
-any-string?: func ["Test if value is a string of any type."
-	value
-	return:			[logic!]
-][
-	found? find any-string! type?/word :value
-]
-any-block?: func ["Test if value is a block of any type."
-	value
-	return:			[logic!]
-][
-	found? find any-block! type?/word :value
-]
-
-single?: func ["Test if series has just one element."
-	series			[series!]
-	return:			[logic!]
-][
-	1 = length? series
-]
-
-offset?: func ["Return difference between two positions in a series."
-	series1			[series!]
-	series2			[series!]
+and~: routine ["Return bitwise AND operation of two integers."
+	integer1		[integer!]
+	integer2		[integer!]
 	return:			[integer!]
 ][
-	subtract index? series2  index? series1
+	integer1 and integer2
 ]
+or~: routine ["Return bitwise inclusive OR operation of two integers."
+	integer1		[integer!]
+	integer2		[integer!]
+	return:			[integer!]
+][
+	integer1 or integer2
+]
+xor~: routine ["Return bitwise exclusive OR operation of two integers."
+	integer1		[integer!]
+	integer2		[integer!]
+	return:			[integer!]
+][
+	integer1 xor integer2
+]
+and: make op! :and~
+or:  make op! :or~
+xor: make op! :xor~
+
+shift-left: routine ["Return INTEGER with bits shifted left by BITS positions."
+	integer			[integer!]
+	bits			[integer!]
+	return:			[integer!]
+][
+	integer << bits
+]
+shift-right: routine ["Return INTEGER with bits shifted right by BITS positions."
+	integer			[integer!]
+	bits			[integer!]
+	return:			[integer!]
+][
+	integer >> bits
+]
+shift-logical: routine ["Return INTEGER with bits shifted right by BITS positions."
+	integer			[integer!]
+	bits			[integer!]
+	return:			[integer!]
+][
+	integer >>> bits
+]
+<<:  make op! :shift-left
+>>:  make op! :shift-right
+>>>: make op! :shift-logical
+shift: func ["Return INTEGER with bits shifted by BITS positions."
+	integer			[integer!]
+	bits			[integer!]
+	/left			"Shift left"
+	/logical		"Logical shift right (fill with zero)"
+	/right			"Signed shift right"
+	return:			[integer! none!]
+][
+	case [
+		left	integer << bits
+		logical	integer >>> bits
+		right	integer >> bits
+		yes		none
+	]
+]
+
+}
 
 
 ; Unicode
@@ -354,4 +356,113 @@ offset?: func ["Return difference between two positions in a series."
 		]
 	]
 
+]
+
+size-of*: routine ["Return UTF-8 size of a Red string."
+	text			[string!]
+;	return:			[integer! none!]  "NONE: error"
+	/local			UTF-8
+][
+	UTF-8: to-UTF8 text
+
+	either none? UTF-8 [
+		RETURN_NONE
+	][
+		integer/box length? UTF-8  ; size? - 1
+		free-any UTF-8
+	]
+]
+size-of: func ["Return UTF-8 size of a Red string."
+	text			[string!]
+	return:			[integer! none!]  "NONE: error"
+][
+	either zero? length? text [0] [size-of* text]
+]
+
+
+; PARSE rules
+
+blank:			charset " ^(tab)^(line)^M^(page)"
+
+letter:			charset [#"A" - #"Z"  #"a" - #"z"]
+
+digit:			charset "0123456789"
+non-zero:		charset "123456789"
+octal:			charset "01234567"
+hexadecimal:	union digit charset [#"A" - #"F"  #"a" - #"f"]
+
+
+; Common functions
+
+Windows?: system/platform = 'Windows
+
+found?: func ["Test if value is not NONE."
+	value
+	return:			[logic!]
+][
+	not none? :value
+]
+
+any-word!: [word! lit-word! set-word! get-word! issue! refinement! datatype!]
+any-string!: [string! file!]
+any-block!: [block! paren! path! lit-path! set-path! get-path!]
+
+any-word?: func ["Test if value is a word of any type."
+	value
+	return:			[logic!]
+][
+	found? find any-word! type?/word :value
+]
+series?: func ["Test if value is a series of any type."
+	value
+	return:			[logic!]
+][
+	found? any-series? :value
+]
+any-string?: func ["Test if value is a string of any type."
+	value
+	return:			[logic!]
+][
+	found? find any-string! type?/word :value
+]
+any-block?: func ["Test if value is a block of any type."
+	value
+	return:			[logic!]
+][
+	found? find any-block! type?/word :value
+]
+
+single?: func ["Test if series has just one element."
+	series			[series!]
+	return:			[logic!]
+][
+	1 = length? series
+]
+
+offset?: func ["Return difference between two positions in a series."
+	series1			[series!]
+	series2			[series!]
+	return:			[integer!]
+][
+	subtract index? series2  index? series1
+]
+
+count: function ["Return number of occurrences of VALUE in SERIES."
+	series		[series!]
+	value
+	return:		[integer!]
+][
+	count: 0
+	parse series [any [
+		value (count: count + 1)
+		| to value
+		| to end
+	]]
+	count
+]
+count-lines: function ["Return number of lines in STRING."
+	string		[string!]
+	return:		[integer!]
+][
+	1 + count string newline
 ]

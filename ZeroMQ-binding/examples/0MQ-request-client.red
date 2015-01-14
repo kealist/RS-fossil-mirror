@@ -1,13 +1,13 @@
 Red [
 	Title:		"ZeroMQ request/reply client example"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos"
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos"
 	License: {
 		PD/CC0
 		http://creativecommons.org/publicdomain/zero/1.0/
 	}
 	Needs: {
-		Red >= 0.3.3
+		Red >= 0.4.3
 		%ZeroMQ-binding.red
 	}
 	Tabs:		4
@@ -20,12 +20,12 @@ Red [
 prin ["0MQ version:" major-version]
 	prin #"."  prin minor-version
 	prin #"."  print patch-version
-print ""
+prin newline
 
 
 ; Hello World client/server
 
-address: any [get-argument 1  "tcp://localhost:5555"]
+address: any [get-argument 1  tcp://localhost:5555]
 request: "Hello"
 
 log-error: does [  ; FIXME: should go to stderr

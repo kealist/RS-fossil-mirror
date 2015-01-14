@@ -1,7 +1,7 @@
 Red/System [
 	Title:		"ZeroMQ request/reply client example"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2011-2013 Kaj de Vos"
+	Rights:		"Copyright (c) 2011-2014 Kaj de Vos"
 	License: {
 		PD/CC0
 		http://creativecommons.org/publicdomain/zero/1.0/
@@ -82,6 +82,7 @@ with zmq [
 								either none? data [
 									print-line "Error: no message content available"
 								][
+									; WARN: assume null tail marker is included
 									print-line ["Received reply " count ": " as-c-string data]
 								]
 								unless end-message message [log-error]

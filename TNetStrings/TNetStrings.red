@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red > 0.4.1
+		Red >= 0.4.3
 		%common/common.red
 		READ
 	}
@@ -32,11 +32,9 @@ Red [
 		To convert Red values to and from (Tagged) NetStrings format.
 	}
 	Notes: {
-		Needs to be compiled. Current Red interpreter can't LOAD the script.
 		TNetStrings specification: http://tnetstrings.org
 		String!s and file!s other than Latin-1 yield size value incompatible with
 		specification.
-		Floats are loaded as file! for now because Red doesn't have them yet.
 	}
 	Tabs:		4
 ]
@@ -45,33 +43,24 @@ Red [
 #include %../common/common.red
 
 
-load-TNetString: func [				"Return value(s) converted from (Tagged) NetStrings format."
+load-TNetString: function [			"Return value(s) converted from (Tagged) NetStrings format."
 	value			[string! file!]	"TNetStrings value(s)"
 	/objects						"Convert dictionaries to Red objects."
 	/keys							"Convert dictionary keys to Red value."
 	/values							"Convert binary values to Red value."
 	/all							"Always return a block."
 	/into							"Insert result into existing block."
-		out			[block!]		"Result buffer"
-	/local  ; FIXME: #600
-;		here
-		start stop size header binary element
+		out			[block!]		"Result buffer (changed)"
 ][
 	header: [
 		start: 1 9 digit stop: #":"
-		(size: load/into append/part
-			clear _string  start  offset? start stop  ; FIXME: #580
-			clear _item
-		)
+		(size: load/part/into start stop  clear _item)
 	]
 	binary: [
 		ahead [size skip #","]
 		[if (value)
-			start: size skip stop:
-			keep (load/into append/part
-				clear _string  start  offset? start stop
-				clear _item
-			)
+			start: size skip
+			keep (load/part/into start size  clear _item)
 		| if (zero? size) keep (make string! 0)  ; FIXME: #603
 		| keep size skip
 		]
@@ -84,29 +73,27 @@ load-TNetString: func [				"Return value(s) converted from (Tagged) NetStrings f
 		| [header [
 			(value: values) binary
 			; WARN: LOAD rules allow spaces
-			| ahead [size skip #"#"]
-				start: size skip stop: skip
+			| start: size skip #"#"
 
-				if (integer? value: load/into append/part
-					clear _string  start  offset? start stop
-					clear _item
-				)
+				if (integer? value: load/part/into start size  clear _item)
 					keep (value)
 			; FIXME: check end positions
-			| ahead [size skip #"^^"]											; TODO: float conversion
-				start: opt #"-"  any digit  opt [#"." any digit] stop: #"^^"
-				keep (append/part make file! 0
-					start  offset? start stop
-				)
+			| ahead [size skip #"^^"]
+				start: opt #"-"  any digit  opt [#"." any digit] #"^^"
+
+				if (any [
+					float? value: load/part/into start size  clear _item
+					integer? value
+				])
+					keep (value)
 			| ahead [size skip #"]"] collect [any element] #"]"					; List
 			| ahead [size skip #"}"]											; Dictionary
 				[if (objects) then [
 					collect set value [any [
-						header  ahead [size skip #","]							; Key
-						start: size skip stop: skip
+						header  start: size skip #","							; Key
 
 						if (set-word? value: load/into append append/part
-							clear _string  start  offset? start stop  #":"
+							clear _string  start size  #":"
 							clear _item
 						)
 							keep (value)
@@ -129,7 +116,7 @@ load-TNetString: func [				"Return value(s) converted from (Tagged) NetStrings f
 		either out [
 			here: out
 
-			if parse/case value [collect into out [any element]] [
+			if parse/case value [collect after out [any element]] [
 				either any [all  1 <> offset? here out] [out] [here/1]
 			]
 		][
@@ -145,8 +132,8 @@ to-TNetString: function [			"Return value converted to (Tagged) NetString."
 	/map							"Convert even sized any-block! to a TNetStrings dictionary."
 	/deep							"Convert nested any-block! to TNetStrings dictionaries."
 	/only							"Omit outer envelope from a TNetStrings list."
-	/into							"Insert result into existing string."
-		result		[string!]		"Result buffer"
+	/into							"Insert result into existing string. Appending uses result buffer directly."
+		result		[string!]		"Result buffer (changed, returned)"
 	return:			[string! none!]	"NONE: error"
 ][
 	clear _string
@@ -178,9 +165,9 @@ to-TNetString: function [			"Return value converted to (Tagged) NetString."
 					#","
 
 				unless either deep [
-					to-TNetString/map/deep/into do [value/:name]  tail out
+					to-TNetString/map/deep/into get in value name  tail out
 				][
-					to-TNetString/into do [value/:name]  tail out
+					to-TNetString/into get in value name  tail out
 				][
 					return none
 				]
@@ -250,9 +237,7 @@ to-TNetString: function [			"Return value converted to (Tagged) NetString."
 						append insert out  size #"]"
 					]
 				]
-			all [bitset? value  not find/match append out value  "make bitset! [not "] [  ; TODO: #622
-				clear out
-
+			all [bitset? value  not complement? value] [
 				either 0100h >= size: length? value [  ; Bytes
 					repeat item size [
 						if value/(item - 1) [
@@ -287,7 +272,7 @@ to-TNetString: function [			"Return value converted to (Tagged) NetString."
 		]
 	]
 	either into [
-		either empty? _string [
+		either empty? _string [  ; Append mode
 			tail result
 		][
 			out: insert result _string

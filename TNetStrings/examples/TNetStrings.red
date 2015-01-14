@@ -7,6 +7,7 @@ Red [
 		http://creativecommons.org/publicdomain/zero/1.0/
 	}
 	Needs: {
+		Red > 0.4.1
 		%C-library/input-output.red
 		%TNetStrings.red
 	}
@@ -20,7 +21,7 @@ print to-TNetString				"Example"
 probe load-TNetString			"7:Example,"
 print to-TNetString/only		[9]
 probe load-TNetString/all		"1:9#"
-probe load-TNetString			"4:6.28^^"  ; Red FIXME
+probe load-TNetString			"4:6.28^^"
 probe load-TNetString/values	{6:#issue,5:%file,8:"string",}
 print to-TNetString				context [a: 9 b: 42]
 print to-TNetString/map			[a 9  b 42]
