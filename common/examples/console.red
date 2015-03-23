@@ -226,9 +226,9 @@ about: does [
 		"Red" system/version newline
 		"Platform:" system/platform {
 
-Copyright (c) 2011-2014 Nenad Rakocevic and contributors. All rights reserved.
+Copyright (c) 2011-2015 Nenad Rakocevic and contributors. All rights reserved.
 Licensed under the Boost Software License, Version 1.0.
-Copyright (c) 2011-2014 Kaj de Vos. All rights reserved.
+Copyright (c) 2011-2015 Kaj de Vos. All rights reserved.
 Licensed under the BSD license.
 
 Use LICENSE for full license text.
@@ -237,7 +237,7 @@ Use LICENSE for full license text.
 ]
 license: does [
 	print
-{Copyright (c) 2011-2014 Nenad Rakocevic and contributors. All rights reserved.
+{Copyright (c) 2011-2015 Nenad Rakocevic and contributors. All rights reserved.
 Boost Software License - Version 1.0 - August 17th, 2003
 
 Permission is hereby granted, free of charge, to any person or organization
@@ -263,7 +263,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 
-Copyright (c) 2011-2014 Kaj de Vos. All rights reserved.
+Copyright (c) 2011-2015 Kaj de Vos. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:

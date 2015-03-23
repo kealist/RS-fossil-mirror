@@ -1,7 +1,7 @@
 Red [
 	Title:		"Common Definitions"
 	Author:		"Kaj de Vos"
-	Rights:		"Copyright (c) 2013,2014 Kaj de Vos. All rights reserved."
+	Rights:		"Copyright (c) 2013-2015 Kaj de Vos. All rights reserved."
 	License: {
 		Redistribution and use in source and binary forms, with or without modification,
 		are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@ Red [
 		OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	}
 	Needs: {
-		Red >= 0.4.2
+		Red >= 0.5.1
 		%C-library/ANSI.reds
 	}
 	Tabs:		4
@@ -403,6 +403,8 @@ found?: func ["Test if value is not NONE."
 	not none? :value
 ]
 
+comment {
+
 any-word!: [word! lit-word! set-word! get-word! issue! refinement! datatype!]
 any-string!: [string! file!]
 any-block!: [block! paren! path! lit-path! set-path! get-path!]
@@ -431,6 +433,8 @@ any-block?: func ["Test if value is a block of any type."
 ][
 	found? find any-block! type?/word :value
 ]
+
+}
 
 single?: func ["Test if series has just one element."
 	series			[series!]
